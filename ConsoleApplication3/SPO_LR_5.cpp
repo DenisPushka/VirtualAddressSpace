@@ -48,22 +48,26 @@ void TwoExemple() {
 	std::cout << " Введите размер региона (байт): ";
 	std::cin >> size;
 	pb = 0;
-	LPVOID address = 0;
+	LPVOID address = NULL;
+	LPVOID pMEM = NULL;
 	while (VirtualQuery(LPCVOID(pb), &mbi, sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(mbi))
 	{
 		if (mbi.RegionSize == size && mbi.State == MEM_FREE)
 		{
 			printf_s(" Адрес выделенного региона: %08x\n", mbi.BaseAddress);
 			address = mbi.BaseAddress;
-			VirtualAlloc(address, mbi.RegionSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+			VirtualAlloc(NULL, mbi.RegionSize, MEM_RESERVE, PAGE_READWRITE);
+			Sleep(10000);
+			pMEM = VirtualAlloc(NULL, mbi.RegionSize, MEM_COMMIT, PAGE_READWRITE);
 			break;
 		}
 		pb = pb + mbi.RegionSize;
 	}
+
 	count = 0;
 	memory = 0;
 	pb = 0;
-	std::cout << "После резервирования: ";
+	std::cout << " После резервирования\n";
 	while (VirtualQuery(LPCVOID(pb), &mbi, sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(mbi))
 	{
 		if (mbi.State == MEM_RESERVE) {
@@ -73,8 +77,9 @@ void TwoExemple() {
 		pb = pb + mbi.RegionSize;
 	}
 	printf_s(" Суммарный объем всех зарезервированных регионов в адресном пространстве процесса: % 8d Кбайт\n Количество зарезервированных регионов выполняющегося процесса: % 8d\n", memory / 1024, count);
-	if (VirtualFree(address, 0, MEM_RELEASE))
+	
+	if (VirtualFree(pMEM, 0, MEM_RELEASE))
 	{
-		printf_s("Возврат физической памяти произошел успешно!\n");
+		printf_s(" Возврат физической памяти произошел успешно!\n");
 	}
 }
